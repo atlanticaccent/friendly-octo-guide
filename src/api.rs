@@ -47,7 +47,7 @@ impl PokeClient for PokeAPI {
     let bytes = to_bytes(res.into_body()).await?;
     let species = from_slice::<PokemonSpecies>(&bytes)?;
 
-    if species.get_first_description().is_none() {
+    if species.get_first_description("en").is_none() {
       return Err(PokError::NoDescription)
     }
 
@@ -86,7 +86,7 @@ impl TranslationClient for TranslationAPI {
       return Ok(translation)
     }
 
-    let desc = pokemon.get_first_description().ok_or(PokError::NoDescription)?;
+    let desc = pokemon.get_first_description("en").ok_or(PokError::NoDescription)?;
 
     let res = self.client
       .get(Uri::builder()
