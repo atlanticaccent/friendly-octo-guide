@@ -1,0 +1,18 @@
+[package]
+name = "truelayer_coding_challenge"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+hyper = "0.14"
+hyper-tls = "0.5"
+moka = { version = "0.7", features = ["future"] }
+tokio = { version = "1", features = ["full"] }
+warp = "0.3"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+async-trait = "0.1"
+urlencoding = "2.1"
+thiserror = "1.0"
