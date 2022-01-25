@@ -66,7 +66,7 @@ pub struct TranslationAPI {
 }
 
 impl TranslationAPI {
-  const TRANSLATE: &'static str = "https://api.funtranslations.com";
+  const TRANSLATE: &'static str = "https://api.funtranslations.com/";
 
   pub fn new(cache: Cache<(String, TranslationType), PokemonSpecies>) -> Self {
     Self {
@@ -91,11 +91,8 @@ impl TranslationClient for TranslationAPI {
     let desc = pokemon.get_first_description("en").ok_or(PokError::NoDescription)?;
 
     let res = self.client
-      .get(Uri::builder()
-        .authority(Self::TRANSLATE)
-        .path_and_query(format!("/{}?text={}", translate_to.to_string(), encode(&desc)))
-        .build()?
-      ).await?;
+      .get(format!("{}{}?text={}", Self::TRANSLATE, translate_to.to_string(), encode(&desc)).parse::<Uri>().expect("Parse URI"))
+      .await?;
 
     let bytes = to_bytes(res.into_body()).await?;
     let translation_unit = from_slice::<TranslationUnit>(&bytes)?;
