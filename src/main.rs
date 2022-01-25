@@ -15,11 +15,10 @@ async fn main() {
 
 async fn run() {
   let cache: Cache<(String, TranslationType), PokemonSpecies> = Cache::new(1_000);
+  let poke_client = PokeAPI::new();
+  let translation_client = TranslationAPI::new();
 
-  let poke_client = PokeAPI::new(cache.clone());
-  let translation_client = TranslationAPI::new(cache);
-
-  warp::serve(router(poke_client, translation_client))
+  warp::serve(router(poke_client, translation_client, cache))
     .run(([0, 0, 0, 0], 8080))
     .await;
 }
