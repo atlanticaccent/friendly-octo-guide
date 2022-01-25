@@ -12,7 +12,7 @@ fn deserialize_poke_api_species() {
   let species = from_slice::<poke_models::PokemonSpecies>(&json).expect("Parse json");
 
   assert_eq!(species.name(), "pikachu");
-  assert_eq!(species.get_first_description("en"), Some("When several of\nthese POKéMON\ngather, their\u{c}electricity could\nbuild and cause\nlightning storms."));
+  assert_eq!(species.get_first_description("en"), Some("When several of these POKéMON gather, their electricity could build and cause lightning storms.".to_owned()));
   assert!(!species.is_legendary());
   assert_eq!(species.habitat(), "forest")
 }

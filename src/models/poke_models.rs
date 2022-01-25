@@ -1,4 +1,10 @@
+use regex::{Regex, RegexBuilder};
 use serde::{Serialize, Deserialize};
+use lazy_static::lazy_static;
+
+lazy_static! {
+  static ref REMOVE_ESCAPED: Regex = RegexBuilder::new("\u{0a}|\u{0c}").case_insensitive(true).build().unwrap();
+}
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct PokemonSpecies {
@@ -22,14 +28,15 @@ impl PokemonSpecies {
 
   // Get a an option that may contain a reference to the first flavor text/description in the language given.
   // If a description has been set (ie: this is being sent back to the client) then returns the value set.
-  pub fn get_first_description(&self, key: &str) -> Option<&str> {
+  pub fn get_first_description(&self, key: &str) -> Option<String> {
     match self.description {
       Description::Vec(ref vec) => {
         vec.iter()
           .find(|flavour| flavour.language().name() == key)
           .and_then(|flavour| Some(flavour.flavor_text()))
+          .and_then(|flavor| Some(REMOVE_ESCAPED.replace_all(flavor, " ").to_string()))
       },
-      Description::String(ref str) => Some(str.as_str())
+      Description::String(ref str) => Some(str.clone())
     }
   }
 
