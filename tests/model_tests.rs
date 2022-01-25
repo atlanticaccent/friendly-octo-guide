@@ -16,3 +16,12 @@ fn deserialize_poke_api_species() {
   assert!(!species.is_legendary());
   assert_eq!(species.habitat(), "forest")
 }
+
+#[test]
+fn deserialize_translation_api_translation() {
+  let json = read(format!("{}/tests/assets/translated_pikachu.json", ROOT)).expect("Read test data");
+
+  let translation = from_slice::<translation_models::TranslationUnit>(&json).expect("Parse json");
+
+  assert_eq!(translation.contents().translated(), "At which hour several of these pokémon gather,  their electricity couldst buildeth and cause lightning storms.")
+}
