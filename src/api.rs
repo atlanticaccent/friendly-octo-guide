@@ -45,9 +45,11 @@ impl PokeClient for PokeAPI {
     }
 
     let bytes = to_bytes(res.into_body()).await?;
-    let species = from_slice::<PokemonSpecies>(&bytes)?;
+    let mut species = from_slice::<PokemonSpecies>(&bytes)?;
 
-    if species.get_first_description("en").is_none() {
+    if let Some(desc) = species.get_first_description("en") {
+      species.set_description(desc)
+    } else {
       return Err(PokError::NoDescription)
     }
 
