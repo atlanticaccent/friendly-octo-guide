@@ -1,19 +1,18 @@
 use moka::future::Cache;
 
-mod util;
-mod api;
-mod server;
+extern crate truelayer_coding_challenge;
 
-use util::{TranslationType, poke_models::PokemonSpecies};
-use api::{PokeAPI, TranslationAPI};
-use server::router;
+use truelayer_coding_challenge::util::TranslationType;
+use truelayer_coding_challenge::models::poke_models::PokemonSpecies;
+use truelayer_coding_challenge::api::{PokeAPI, TranslationAPI};
+use truelayer_coding_challenge::server::router;
 
 #[tokio::main]
 async fn main() {
   run().await
 }
 
-async fn run() {
+pub async fn run() {
   let cache: Cache<(String, TranslationType), PokemonSpecies> = Cache::new(1_000);
   let poke_client = PokeAPI::new();
   let translation_client = TranslationAPI::new();

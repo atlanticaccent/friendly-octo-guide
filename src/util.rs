@@ -4,14 +4,9 @@ use hyper::StatusCode;
 use serde::Serialize;
 use thiserror::Error;
 use async_trait::async_trait;
-
-#[path ="models/poke_models.rs"]
-pub mod poke_models;
-#[path ="models/translation_models.rs"]
-pub mod translation_models;
-
-use poke_models::PokemonSpecies;
 use warp::{Reply, Rejection, reject::{Reject, MethodNotAllowed}, reply, body::BodyDeserializeError};
+
+use crate::models::poke_models::PokemonSpecies;
 
 #[async_trait]
 pub trait PokeClient: Send + Sync + Clone + 'static {

@@ -1,7 +1,7 @@
 use std::fs::read;
 
 use serde_json::from_slice;
-use truelayer_coding_challenge::util::{poke_models, translation_models};
+use truelayer_coding_challenge::models::{poke_models, translation_models};
 
 const ROOT: &'static str = env!("CARGO_MANIFEST_DIR");
 

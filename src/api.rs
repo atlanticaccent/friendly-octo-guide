@@ -4,7 +4,8 @@ use hyper_tls::HttpsConnector;
 use serde_json::from_slice;
 use urlencoding::encode;
 
-use crate::util::{poke_models::PokemonSpecies, translation_models::TranslationUnit, PokeClient, TranslationClient, TranslationType, PokError};
+use super::util::{PokeClient, TranslationClient, TranslationType, PokError};
+use super::models::{poke_models::PokemonSpecies, translation_models::TranslationUnit};
 
 #[derive(Clone)]
 pub struct PokeAPI {
