@@ -1,6 +1,6 @@
 use std::convert::Infallible;
 
-use crate::lib::{PokeClient, TranslationClient, TranslationType, poke_models::PokemonSpecies, handle_reject, PokError};
+use crate::util::{PokeClient, TranslationClient, TranslationType, poke_models::PokemonSpecies, handle_reject, PokError};
 use moka::future::Cache;
 use warp::{Reply, Filter, reject, Rejection, reply::json, path};
 

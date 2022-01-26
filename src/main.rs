@@ -1,10 +1,10 @@
 use moka::future::Cache;
 
-mod lib;
+mod util;
 mod api;
 mod server;
 
-use lib::{TranslationType, poke_models::PokemonSpecies};
+use util::{TranslationType, poke_models::PokemonSpecies};
 use api::{PokeAPI, TranslationAPI};
 use server::router;
 
