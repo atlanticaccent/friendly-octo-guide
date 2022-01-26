@@ -11,7 +11,7 @@ pub struct PokemonSpecies {
   name: String,
   #[serde(alias = "flavor_text_entries")]
   description: Description,
-  habitat: NamedAPIResource,
+  habitat: Habitat,
   is_legendary: bool,
 }
 
@@ -46,9 +46,19 @@ impl PokemonSpecies {
     self.description = Description::String(description)
   }
 
-  /// Get a reference to the pokemon species's habitat.
+  // Get a reference to the pokemon species's habitat.
   pub fn habitat(&self) -> &str {
-    &self.habitat.name()
+    match &self.habitat {
+      Habitat::NamedAPIResource(resource) => resource.name(),
+      Habitat::String(string) => string
+    }
+  }
+
+  // Set the pokemon's habitat
+  pub fn format_habitat(&mut self) {
+    if let Habitat::NamedAPIResource(resource) = &self.habitat {
+      self.habitat = Habitat::String(resource.name().to_owned())
+    }
   }
 }
 
@@ -56,6 +66,13 @@ impl PokemonSpecies {
 #[serde(untagged)]
 pub enum Description {
   Vec(Vec<FlavourText>),
+  String(String)
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+#[serde(untagged)]
+pub enum Habitat {
+  NamedAPIResource(NamedAPIResource),
   String(String)
 }
 

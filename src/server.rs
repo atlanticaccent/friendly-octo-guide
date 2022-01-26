@@ -62,6 +62,13 @@ pub async fn advanced_handler(
   }
 }
 
+fn format(
+  mut pokemon: PokemonSpecies
+) -> impl Reply {
+  pokemon.format_habitat();
+  json(&pokemon)
+}
+
 fn with_poke_client(
   poke_client: impl PokeClient,
 ) -> impl Filter<Extract = (impl PokeClient,), Error = Infallible> + Clone {
@@ -99,6 +106,6 @@ pub fn router(
         .and_then(advanced_handler)
     )
     .unify()
-    .map(|res| json(&res))
+    .map(|p| format(p))
     .recover(handle_reject)
 }

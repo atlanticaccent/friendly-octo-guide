@@ -19,7 +19,7 @@ async fn basic_handler_test() {
 
   assert!(res.status().is_success());
   assert_eq!(
-    String::from_utf8(res.body().to_vec()).expect("Parse"),
-    String::from_utf8(read(format!("{}/tests/assets/expected_pikachu.json", ROOT)).expect("Read test data")).expect("Parse")
+    res.body().to_vec(),
+    read(format!("{}/tests/assets/expected_pikachu.json", ROOT)).expect("Read test data")
   )
 }
