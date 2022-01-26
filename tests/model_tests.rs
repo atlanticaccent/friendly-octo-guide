@@ -19,7 +19,7 @@ fn deserialize_poke_api_species() {
 
 #[test]
 fn deserialize_translation_api_translation() {
-  let json = read(format!("{}/tests/assets/translated_pikachu.json", ROOT)).expect("Read test data");
+  let json = read(format!("{}/tests/assets/raw_translation.json", ROOT)).expect("Read test data");
 
   let translation = from_slice::<translation_models::TranslationUnit>(&json).expect("Parse json");
 
