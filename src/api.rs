@@ -8,30 +8,36 @@ use super::util::{PokeClient, TranslationClient, TranslationType, PokError};
 use super::models::{poke_models::PokemonSpecies, translation_models::TranslationUnit};
 
 #[derive(Clone)]
-pub struct PokeAPI {
-  client: Client<HttpsConnector<HttpConnector>>
+pub struct API {
+  client: Client<HttpsConnector<HttpConnector>>,
+  uri_override: Option<String>
 }
 
-impl PokeAPI {
-  const POKEAPI: &'static str = "https://pokeapi.co/api/v2/pokemon-species/";
-
+impl API {
   pub fn new() -> Self {
     Self {
       client: Client::builder()
-        .build(HttpsConnector::new())
+        .build(HttpsConnector::new()),
+      uri_override: None,
     }
+  }
+
+  pub fn override_uri(&mut self, over_ride: String) {
+    self.uri_override = Some(over_ride);
   }
 }
 
 #[async_trait]
-impl PokeClient for PokeAPI {
-  fn get_pokeapi_url() -> String {
-    Self::POKEAPI.to_string()
+impl PokeClient for API {
+  const POKEAPI: &'static str = "https://pokeapi.co/api/v2/pokemon-species/";
+
+  fn get_pokeapi_url(&self) -> String {
+    self.uri_override.clone().unwrap_or(Self::POKEAPI.to_string())
   }
 
   async fn get_pokemon(&self, pokemon: String) -> Result<PokemonSpecies, PokError> {
     let res = self.client
-      .get(format!("{}{}", Self::POKEAPI, pokemon).parse::<Uri>().expect("Parse URI"))
+      .get(format!("{}{}", self.get_pokeapi_url(), pokemon).parse::<Uri>().expect("Parse URI"))
       .await?;
 
     if !res.status().is_success() {
@@ -51,33 +57,19 @@ impl PokeClient for PokeAPI {
   }
 }
 
-#[derive(Clone)]
-pub struct TranslationAPI {
-  client: Client<HttpsConnector<HttpConnector>>
-}
-
-impl TranslationAPI {
-  const TRANSLATE: &'static str = "https://api.funtranslations.com/";
-
-  pub fn new() -> Self {
-    Self {
-      client: Client::builder()
-        .build(HttpsConnector::new())
-    }
-  }
-}
-
 #[async_trait]
-impl TranslationClient for TranslationAPI {
-  fn get_translation_url() -> String {
-    Self::TRANSLATE.to_owned()
+impl TranslationClient for API {
+  const TRANSLATION_API: &'static str = "https://api.funtranslations.com/";
+
+  fn get_translation_url(&self) -> String {
+    self.uri_override.clone().unwrap_or(Self::TRANSLATION_API.to_string())
   }
 
   async fn translate(&self, pokemon: &PokemonSpecies, translate_to: TranslationType) -> Result<PokemonSpecies, PokError> {
     let desc = pokemon.get_first_description("en").ok_or(PokError::NoDescription)?;
 
     let res = self.client
-      .get(format!("{}{}?text={}", Self::TRANSLATE, translate_to.to_string(), encode(&desc)).parse::<Uri>().expect("Parse URI"))
+      .get(format!("{}{}?text={}", self.get_translation_url(), translate_to.to_string(), encode(&desc)).parse::<Uri>().expect("Parse URI"))
       .await?;
 
     let bytes = to_bytes(res.into_body()).await?;

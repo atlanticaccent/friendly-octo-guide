@@ -10,14 +10,18 @@ use crate::models::poke_models::PokemonSpecies;
 
 #[async_trait]
 pub trait PokeClient: Send + Sync + Clone + 'static {
-  fn get_pokeapi_url() -> String;
+  const POKEAPI: &'static str;
+
+  fn get_pokeapi_url(&self) -> String;
 
   async fn get_pokemon(&self, pokemon: String) -> Result<PokemonSpecies, PokError>;
 }
 
 #[async_trait]
 pub trait TranslationClient: Send + Sync + Clone + 'static {
-  fn get_translation_url() -> String;
+  const TRANSLATION_API: &'static str;
+
+  fn get_translation_url(&self) -> String;
 
   async fn translate(&self, pokemon: &PokemonSpecies, translate_to: TranslationType) -> Result<PokemonSpecies, PokError>;
 }

@@ -3,17 +3,20 @@ use std::fs::read;
 use async_trait::async_trait;
 use hyper::StatusCode;
 use serde_json::from_slice;
+
 use truelayer_coding_challenge::util::{PokeClient, TranslationClient, PokError, TranslationType};
 use truelayer_coding_challenge::models::poke_models::PokemonSpecies;
+
+const ROOT: &'static str = env!("CARGO_MANIFEST_DIR");
 
 #[derive(Clone)]
 pub(crate) struct MockPokeAPI;
 
-const ROOT: &'static str = env!("CARGO_MANIFEST_DIR");
-
 #[async_trait]
 impl PokeClient for MockPokeAPI {
-  fn get_pokeapi_url() -> String {
+  const POKEAPI: & 'static str = "";
+
+  fn get_pokeapi_url(&self) -> String {
     String::from("")
   }
 
@@ -31,7 +34,9 @@ pub(crate) struct MockTranslationAPI;
 
 #[async_trait]
 impl TranslationClient for MockTranslationAPI {
-  fn get_translation_url() -> String {
+  const TRANSLATION_API: & 'static str = "";
+
+  fn get_translation_url(&self) -> String {
     String::from("")
   }
 
@@ -42,5 +47,5 @@ impl TranslationClient for MockTranslationAPI {
       Err(PokError::Unavailable(StatusCode::BAD_REQUEST))
     }
   }
-}
 
+}
