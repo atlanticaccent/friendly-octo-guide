@@ -24,12 +24,14 @@ impl API {
     }
   }
 
-  pub fn override_uri(&mut self, over_ride: String) {
+  pub fn override_uri(mut self, over_ride: String) -> Self {
     self.uri_override = Some(over_ride);
+    self
   }
 
-  pub fn disable_https(&mut self) {
+  pub fn disable_https(mut self) -> Self {
     self.https = false;
+    self
   }
 }
 
