@@ -88,7 +88,11 @@ impl TranslationClient for API {
       )
       .await?;
 
+    let status = res.status();
     let bytes = to_bytes(res.into_body()).await?;
+    if !status.is_success() {
+      println!("{}", String::from_utf8_lossy(&bytes))
+    }
     let translation_unit = from_slice::<TranslationUnit>(&bytes)?;
     let translation = translation_unit.contents().translated().to_owned();
 

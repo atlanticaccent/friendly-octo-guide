@@ -44,17 +44,21 @@ pub async fn advanced_handler(
     TranslationType::Shakespeare
   };
 
-  let res = if let Some(cached_translated) = cache.get(&(pokemon.name().to_owned(), translate_to)) {
-    Ok(cached_translated)
-  } else {
+  if let Some(cached_translated) = cache.get(&(pokemon.name().to_owned(), translate_to)) {
+    return Ok(cached_translated)
+  }
+
+  let res = {
     translation_client
       .translate(&pokemon, translate_to)
       .await
   };
 
-
   match res {
-    Ok(translated) => Ok(translated),
+    Ok(translated) => {
+      cache.insert((pokemon.name().to_owned(), translate_to), translated.clone()).await;
+      Ok(translated)
+    },
     Err(_err) => {
       dbg!(_err);
       Ok(pokemon)
