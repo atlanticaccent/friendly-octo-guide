@@ -1,10 +1,12 @@
 use std::convert::Infallible;
+use core::hash::Hash;
 
 use hyper::StatusCode;
 use serde::Serialize;
 use thiserror::Error;
 use async_trait::async_trait;
 use warp::{Reply, Rejection, reject::{Reject, MethodNotAllowed}, reply, body::BodyDeserializeError};
+use moka::future::Cache;
 
 use crate::models::poke_models::PokemonSpecies;
 
@@ -24,6 +26,35 @@ pub trait TranslationClient: Send + Sync + Clone + 'static {
   fn get_translation_url(&self) -> String;
 
   async fn translate(&self, pokemon: &PokemonSpecies, translate_to: TranslationType) -> Result<PokemonSpecies, PokError>;
+}
+
+#[async_trait]
+pub trait CacheWrapper<K, V>: Send + Sync + Clone + 'static
+where
+  K: Hash + Eq + Send + Sync + 'static,
+  V: Clone + Send + Sync + 'static,
+{
+  fn get(&self, key: &K) -> Option<V>;
+
+  async fn insert(&self, key: K, value: V);
+}
+
+#[derive(Clone)]
+pub struct MokaCache<K: Hash + Eq + Send + Sync + 'static, V: Clone + Send + Sync + 'static>(pub Cache<K, V>);
+
+#[async_trait]
+impl<K, V> CacheWrapper<K, V> for MokaCache<K, V> 
+where
+  K: Clone + Hash + Eq + Send + Sync + 'static,
+  V: Clone + Send + Sync + 'static,
+{
+  fn get(&self, key: &K) -> Option<V> {
+    self.0.get(key)
+  }
+
+  async fn insert(&self, key: K, value: V) {
+    self.0.insert(key, value).await
+  }
 }
 
 #[derive(Clone, Copy, Hash, PartialEq, Eq)]

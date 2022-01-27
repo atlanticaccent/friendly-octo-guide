@@ -3,7 +3,7 @@ use std::{fs::read, convert::Infallible};
 use moka::future::Cache;
 use warp::{test::request, Filter, Reply};
 
-use truelayer_coding_challenge::{server::*, util::TranslationType, models::poke_models::PokemonSpecies};
+use truelayer_coding_challenge::{server::*, util::{TranslationType, MokaCache}, models::poke_models::PokemonSpecies};
 
 mod mock_impl;
 use mock_impl::{MockPokeAPI, MockTranslationAPI};
@@ -11,7 +11,7 @@ use mock_impl::{MockPokeAPI, MockTranslationAPI};
 const ROOT: &'static str = env!("CARGO_MANIFEST_DIR");
 
 fn setup() -> impl Filter<Extract = impl Reply, Error = Infallible> + Clone {
-  let cache: Cache<(String, TranslationType), PokemonSpecies> = Cache::new(1_000);
+  let cache: MokaCache<(String, TranslationType), PokemonSpecies> = MokaCache(Cache::new(1_000));
   router(MockPokeAPI, MockTranslationAPI, cache)
 }
 
