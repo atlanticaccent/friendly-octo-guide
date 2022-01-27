@@ -10,7 +10,8 @@ use super::models::{poke_models::PokemonSpecies, translation_models::Translation
 #[derive(Clone)]
 pub struct API {
   client: Client<HttpsConnector<HttpConnector>>,
-  uri_override: Option<String>
+  uri_override: Option<String>,
+  https: bool,
 }
 
 impl API {
@@ -19,17 +20,22 @@ impl API {
       client: Client::builder()
         .build(HttpsConnector::new()),
       uri_override: None,
+      https: true,
     }
   }
 
   pub fn override_uri(&mut self, over_ride: String) {
     self.uri_override = Some(over_ride);
   }
+
+  pub fn disable_https(&mut self) {
+    self.https = false;
+  }
 }
 
 #[async_trait]
 impl PokeClient for API {
-  const POKEAPI: &'static str = "https://pokeapi.co/api/v2/pokemon-species/";
+  const POKEAPI: &'static str = "pokeapi.co";
 
   fn get_pokeapi_url(&self) -> String {
     self.uri_override.clone().unwrap_or(Self::POKEAPI.to_string())
@@ -37,7 +43,12 @@ impl PokeClient for API {
 
   async fn get_pokemon(&self, pokemon: String) -> Result<PokemonSpecies, PokError> {
     let res = self.client
-      .get(format!("{}{}", self.get_pokeapi_url(), pokemon).parse::<Uri>().expect("Parse URI"))
+      .get(Uri::builder()
+        .scheme(if self.https { "https" } else { "http" })
+        .authority(self.get_pokeapi_url())
+        .path_and_query(format!("/api/v2/pokemon-species/{}", pokemon))
+        .build()?
+      )
       .await?;
 
     if !res.status().is_success() {
@@ -59,7 +70,7 @@ impl PokeClient for API {
 
 #[async_trait]
 impl TranslationClient for API {
-  const TRANSLATION_API: &'static str = "https://api.funtranslations.com/";
+  const TRANSLATION_API: &'static str = "api.funtranslations.com";
 
   fn get_translation_url(&self) -> String {
     self.uri_override.clone().unwrap_or(Self::TRANSLATION_API.to_string())
@@ -69,7 +80,12 @@ impl TranslationClient for API {
     let desc = pokemon.get_first_description("en").ok_or(PokError::NoDescription)?;
 
     let res = self.client
-      .get(format!("{}{}?text={}", self.get_translation_url(), translate_to.to_string(), encode(&desc)).parse::<Uri>().expect("Parse URI"))
+      .get(Uri::builder()
+        .scheme(if self.https { "https" } else { "http" })
+        .authority(self.get_translation_url())
+        .path_and_query(format!("/translate/{}?text={}", translate_to.to_string(), encode(&desc)))
+        .build()?
+      )
       .await?;
 
     let bytes = to_bytes(res.into_body()).await?;
