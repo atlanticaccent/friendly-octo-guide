@@ -11,7 +11,8 @@ pub struct PokemonSpecies {
   name: String,
   #[serde(alias = "flavor_text_entries")]
   description: Description,
-  habitat: Habitat,
+  // Undocumented aspect of Pokeapi is that habitat may be null - example, Arceus
+  habitat: Option<Habitat>,
   is_legendary: bool,
 }
 
@@ -49,15 +50,18 @@ impl PokemonSpecies {
   // Get a reference to the pokemon species's habitat.
   pub fn habitat(&self) -> &str {
     match &self.habitat {
-      Habitat::NamedAPIResource(resource) => resource.name(),
-      Habitat::String(string) => string
+      Some(Habitat::NamedAPIResource(resource)) => resource.name(),
+      Some(Habitat::String(string)) => string,
+      None => "null"
     }
   }
 
   // Set the pokemon's habitat
   pub fn format_habitat(&mut self) {
-    if let Habitat::NamedAPIResource(resource) = &self.habitat {
-      self.habitat = Habitat::String(resource.name().to_owned())
+    if let Some(Habitat::NamedAPIResource(resource)) = &self.habitat {
+      self.habitat = Some(Habitat::String(resource.name().to_owned()))
+    } else if let None = &self.habitat {
+      self.habitat = Some(Habitat::String(String::from("null")))
     }
   }
 }
