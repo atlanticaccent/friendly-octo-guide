@@ -25,3 +25,27 @@ fn deserialize_translation_api_translation() {
 
   assert_eq!(translation.contents().translated(), "At which hour several of these pokémon gather,  their electricity couldst buildeth and cause lightning storms.")
 }
+
+#[test]
+fn deserialize_poke_api_species_legendary() {
+  let json = read(format!("{}/tests/assets/raw_regice.json", ROOT)).expect("Read test data");
+
+  let species = from_slice::<poke_models::PokemonSpecies>(&json).expect("Parse json");
+
+  assert_eq!(species.name(), "regice");
+  assert_eq!(species.get_first_description("en"), Some("REGICE’s body was made during an ice age. The deep-frozen body can’t be melted, even by fire. This POKéMON controls frigid air of minus 328 degrees F.".to_owned()));
+  assert!(species.is_legendary());
+  assert_eq!(species.habitat(), "cave")
+}
+
+#[test]
+fn deserialize_poke_api_species_null_habitat() {
+  let json = read(format!("{}/tests/assets/raw_arceus.json", ROOT)).expect("Read test data");
+
+  let species = from_slice::<poke_models::PokemonSpecies>(&json).expect("Parse json");
+
+  assert_eq!(species.name(), "arceus");
+  assert_eq!(species.get_first_description("en"), Some("It is described in mythology as the Pokémon that shaped the universe with its 1,000 arms.".to_owned()));
+  assert!(!species.is_legendary());
+  assert_eq!(species.habitat(), "null")
+}
