@@ -8,7 +8,7 @@ lazy_static! {
   static ref REMOVE_ESCAPED: Regex = RegexBuilder::new("\u{0a}|\u{0c}").case_insensitive(true).build().unwrap();
 }
 
-/// Serde model representing either the response from Pokeapi.
+/// Serde model representing a response from Pokeapi.
 /// 
 /// As serde lets us ignore unknown fields, this model is designed to only 
 /// extract the fields relevant to any response that would be generated.
