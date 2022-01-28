@@ -99,9 +99,8 @@ pub enum TranslationType {
 
 /// The to_string function is only used when generating the api path
 /// 
-/// There should never be a case where a translation request is made with no 
-/// translation type set, thus panicing when given None is the most correct 
-/// approach as if it ocurrs the application has entered an undefined state.
+/// Panics if called on None, as asking for a translation to, effectively, no 
+/// language or scheme, is undefined.
 impl ToString for TranslationType {
   fn to_string(&self) -> String {
     match self {
