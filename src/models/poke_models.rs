@@ -20,7 +20,7 @@ pub struct PokemonSpecies {
   name: String,
   #[serde(alias = "flavor_text_entries")]
   descriptions: Vec<FlavourText>,
-  // Undocumented aspect of Pokeapi is that habitat may be null - example, Arceus
+  /// Undocumented aspect of Pokeapi is that habitat may be null - example, Arceus
   habitat: Option<NamedAPIResource>,
   is_legendary: bool,
 }
@@ -37,6 +37,9 @@ impl PokemonSpecies {
   }
 
   /// Get an option that may contain a reference to the first flavor text/description in the language given.
+  ///
+  /// If no flavor texts were returned from the API, or, more likely, there were
+  /// no flavor texts in the given language, then this function returns None.
   pub fn get_first_description(&self, key: &str) -> Option<String> {
     self.descriptions.iter()
       .find(|flavour| flavour.language().name() == key)
@@ -44,7 +47,10 @@ impl PokemonSpecies {
       .and_then(|flavor| Some(REMOVE_ESCAPED.replace_all(flavor, " ").to_string()))
   }
 
-  // Get a reference to the pokemon species's habitat.
+  /// Get a reference to the pokemon species's habitat.
+  /// 
+  /// Returns the literal "null" when the response from Pokeapi itself has 
+  /// "null" set in the habitat field.
   pub fn habitat(&self) -> &str {
     match &self.habitat {
       Some(resource) => resource.name(),
@@ -53,19 +59,30 @@ impl PokemonSpecies {
   }
 }
 
+/// A Name API Resource
+/// 
+/// Commonly used in Pokeapi to return objects that have a value but may also 
+/// refer to another part of the API for a more detailed response.
+/// 
+/// As with PokemonSpecies, we have no use for the returned URL and so don't 
+/// bother including it in the model.
 #[derive(Deserialize)]
 pub struct NamedAPIResource {
   name: String,
-  // url: String
 }
 
 impl NamedAPIResource {
-  /// Get a reference to the named apiresource's name.
+  /// Get a reference to the named apiresource's value.
   pub fn name(&self) -> &str {
     self.name.as_ref()
   }
 }
 
+/// A flavor text as returned by Pokeapi
+/// 
+/// Contains a flavor text (which may include a wide range of unicode, including
+/// newlines and form feeds) and a Named API Resource representing the language 
+/// the flavor text is in.
 #[derive(Deserialize)]
 pub struct FlavourText {
   flavor_text: String,
@@ -84,6 +101,14 @@ impl FlavourText {
   }
 }
 
+/// The response this API will return following a successful request.
+/// 
+/// Effectively a stricter version of PokemonSpecies, implementing 
+/// TryFrom<PokemonSpecies> to allow conversion between the two, which may or 
+/// may not fail.
+/// 
+/// The use of a separate type ensures that the returned object is always 
+/// explicitly a response type, and not just a passed on API response.
 #[derive(Serialize, Clone)]
 pub struct PokemonResponse {
   name: String,
