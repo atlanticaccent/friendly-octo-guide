@@ -100,6 +100,9 @@ impl TranslationClient for API {
       .await?;
 
     return if !res.status().is_success() {
+      if res.status() == 429 {
+        println!("Rate limited by Funtranslations API")
+      }
       Err(PokError::Unavailable(res.status()))
     } else {
       let bytes = to_bytes(res.into_body()).await?;
