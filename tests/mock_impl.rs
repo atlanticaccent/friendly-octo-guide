@@ -2,7 +2,6 @@ use std::fs::read;
 use std::sync::{Arc, Mutex, MutexGuard};
 
 use async_trait::async_trait;
-use hyper::StatusCode;
 use moka::future::Cache;
 use serde_json::from_slice;
 
