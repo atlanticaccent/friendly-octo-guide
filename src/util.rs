@@ -10,6 +10,12 @@ use moka::future::Cache;
 
 use crate::models::poke_models::{PokemonSpecies, PokemonResponse};
 
+/// Trait defining the functions an API object needs to contact Pokeapi
+/// 
+/// Returns either a deserialised API response or an error.
+/// 
+/// `get_pokemonapi_url` is included as a test helper, allowing test functions 
+/// to modify what url an API under test contacts.
 #[async_trait]
 pub trait PokeClient: Send + Sync + Clone + 'static {
   const POKEAPI: &'static str;
@@ -19,6 +25,12 @@ pub trait PokeClient: Send + Sync + Clone + 'static {
   async fn get_pokemon(&self, pokemon: String) -> Result<PokemonSpecies, PokError>;
 }
 
+/// Trait defining the methods an API object needs to contact funtranslations
+/// 
+/// Returns either a deserialised API response or an error.
+/// 
+/// `get_translation_url` is included as a test helper, allowing test functions 
+/// to modify what url an API under test contacts.
 #[async_trait]
 pub trait TranslationClient: Send + Sync + Clone + 'static {
   const TRANSLATION_API: &'static str;
@@ -28,6 +40,12 @@ pub trait TranslationClient: Send + Sync + Clone + 'static {
   async fn translate(&self, pokemon: &PokemonResponse, translate_to: TranslationType) -> Result<String, PokError>;
 }
 
+/// Trait defining cache insertion and get functions
+/// 
+/// This trait exists solely to improve testing ergonomics - when not testing 
+/// this just re-exports the existing cache functions. However, under test, 
+/// additional instrumentation can be attached allowing for inspection of cache 
+/// utilisation.
 #[async_trait]
 pub trait CacheWrapper<K, V>: Send + Sync + Clone + 'static
 where
@@ -39,6 +57,9 @@ where
   async fn insert(&self, key: K, value: V);
 }
 
+/// Non-test implementation of the CacheWrapper trait.
+/// 
+/// Utilises the moka cache library.
 #[derive(Clone)]
 pub struct MokaCache<K: Hash + Eq + Send + Sync + 'static, V: Clone + Send + Sync + 'static>(pub Cache<K, V>);
 
@@ -57,6 +78,16 @@ where
   }
 }
 
+/// The type of translation that is being requested
+/// 
+/// Pokemon that reside in cave habitats and/or are legendary should be 
+/// translated under the Yoda scheme.
+/// All other pokemon should be translated using the Shakespeare scheme.
+/// In the case where an non-translation request is made the type is None.
+/// 
+/// This is utilised for caching purposes - by keying on not only the pokemon 
+/// name but also the translation type, both the untranslated and translated 
+/// pokemon objects can be cached simultaneously.
 #[derive(Clone, Copy, Hash, PartialEq, Eq)]
 pub enum TranslationType {
   Yoda,
@@ -64,6 +95,11 @@ pub enum TranslationType {
   None
 }
 
+/// The to_string function is only used when generating the api path
+/// 
+/// There should never be a case where a translation request is made with no 
+/// translation type set, thus panicing when given None is the most correct 
+/// approach as if it ocurrs the application has entered an undefined state.
 impl ToString for TranslationType {
   fn to_string(&self) -> String {
     match self {
@@ -74,6 +110,9 @@ impl ToString for TranslationType {
   }
 }
 
+/// Potential errors that can ocurr during running
+/// 
+/// The majority are wrappers around existing library error types.
 #[derive(Error, Debug)]
 pub enum PokError {
   #[error("Generic http stream error")]
@@ -103,6 +142,10 @@ struct ErrorReply {
 
 impl Reject for PokError {}
 
+/// Handle errors raised at runtime and generate appropriate HTTP error responses
+/// 
+/// Some of the returned status codes are only approximate, and would ideally 
+/// have greater inspection of the actual error.
 pub async fn handle_reject(err: Rejection) -> Result<impl Reply, Infallible> {
   let (code, message) = if err.is_not_found() {
     (StatusCode::NOT_FOUND, "Not Found")
