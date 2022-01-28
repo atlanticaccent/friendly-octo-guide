@@ -68,3 +68,42 @@ async fn test_advanced_handler_networked() {
 
   mock.assert_async().await;
 }
+
+#[tokio::test]
+async fn test_advanced_handler_yoda() {
+  let mock_server = MockServer::start_async().await;
+
+  let mock_diglett = mock_server.mock_async(|when, then| {
+    when.method(GET)
+      .path("/translate/yoda")
+      .query_param("text", "Lives about one yard underground where it feeds on plant roots. It sometimes appears above ground.");
+    then.status(200)
+      .header("content-type", "application/json")
+      .body_from_file(format!("{}/tests/assets/raw_translation_diglett.json", ROOT));
+  }).await;
+
+  let mock_regice = mock_server.mock_async(|when, then| {
+    when.method(GET)
+      .path("/translate/yoda")
+      .query_param("text", "REGICE’s body was made during an ice age. The deep-frozen body can’t be melted, even by fire. This POKéMON controls frigid air of minus 328 degrees F.");
+    then.status(200)
+      .header("content-type", "application/json")
+      .body_from_file(format!("{}/tests/assets/raw_translation_regice.json", ROOT));
+  }).await;
+
+  let translation_client = API::new()
+    .override_uri(mock_diglett.server_address().to_string())
+    .disable_https();
+
+  let cache: MokaCache<(String, TranslationType), PokemonSpecies> = MokaCache(Cache::new(1_000));
+  let router = router(MockPokeAPI, translation_client, cache);
+
+  let res_a = request().path("/pokemon/translated/diglett").reply(&router).await;
+  let res_b = request().path("/pokemon/translated/regice").reply(&router).await;
+
+  assert!(res_a.status().is_success());
+  assert!(res_b.status().is_success());
+
+  mock_diglett.assert_async().await;
+  mock_regice.assert_async().await;
+}
