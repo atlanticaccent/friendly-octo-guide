@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["truelayer_coding_challenge"] = [{"text":"impl <a class=\"trait\" href=\"warp/reject/trait.Reject.html\" title=\"trait warp::reject::Reject\">Reject</a> for <a class=\"enum\" href=\"truelayer_coding_challenge/util/enum.PokError.html\" title=\"enum truelayer_coding_challenge::util::PokError\">PokError</a>","synthetic":false,"types":["truelayer_coding_challenge::util::PokError"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

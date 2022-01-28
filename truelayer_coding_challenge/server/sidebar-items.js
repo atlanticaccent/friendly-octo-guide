@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["advanced_handler","Filter for “advanced”, translation API requests"],["basic_handler","Filter for “basic” non-translation API requests"],["router","Full router of available public API endpoints"]]});

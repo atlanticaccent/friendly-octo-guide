@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["API","An “API” that can connect to a given API and make requests"]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Contents","The actual translated string, as wrapped in a JSON object"],["TranslationUnit","The response returned from api.funtranslations"]]});
