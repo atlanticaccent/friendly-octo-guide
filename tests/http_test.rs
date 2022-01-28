@@ -1,3 +1,5 @@
+use std::fs::read;
+
 use httpmock::MockServer;
 use httpmock::prelude::*;
 use moka::future::Cache;
@@ -106,4 +108,32 @@ async fn test_advanced_handler_yoda() {
 
   mock_diglett.assert_async().await;
   mock_regice.assert_async().await;
+}
+
+#[tokio::test]
+async fn test_advanced_handler_rejection() {
+  let mock_server = MockServer::start_async().await;
+
+  let mock = mock_server.mock_async(|when, then| {
+    when.method(GET)
+      .any_request();
+    then.status(429);
+  }).await;
+
+  let translation_client = API::new()
+    .override_uri(mock.server_address().to_string())
+    .disable_https();
+
+  let cache: MokaCache<(String, TranslationType), PokemonSpecies> = MokaCache(Cache::new(1_000));
+  let router = router(MockPokeAPI, translation_client, cache);
+
+  let res = request().path("/pokemon/translated/pikachu").reply(&router).await;
+
+  assert!(res.status().is_success());
+  assert_eq!(
+    res.body().to_vec(),
+    read(format!("{}/tests/assets/expected_pikachu.json", ROOT)).expect("Read test data")
+  );
+
+  mock.assert_async().await;
 }
