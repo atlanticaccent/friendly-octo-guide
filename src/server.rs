@@ -29,7 +29,7 @@ pub async fn basic_handler(
 }
 
 pub async fn advanced_handler(
-  pokemon: PokemonSpecies,
+  mut pokemon: PokemonSpecies,
   translation_client: impl TranslationClient,
   cache: impl CacheWrapper<(String, TranslationType), PokemonSpecies>,
 ) -> Result<PokemonSpecies, Rejection> {
@@ -51,8 +51,10 @@ pub async fn advanced_handler(
 
   match res {
     Ok(translated) => {
-      cache.insert((pokemon.name().to_owned(), translate_to), translated.clone()).await;
-      Ok(translated)
+      pokemon.set_description(translated);
+
+      cache.insert((pokemon.name().to_owned(), translate_to), pokemon.clone()).await;
+      Ok(pokemon)
     },
     Err(_err) => {
       dbg!(_err);

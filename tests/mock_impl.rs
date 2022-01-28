@@ -6,6 +6,7 @@ use hyper::StatusCode;
 use moka::future::Cache;
 use serde_json::from_slice;
 
+use truelayer_coding_challenge::models::translation_models::TranslationUnit;
 use truelayer_coding_challenge::util::{PokeClient, TranslationClient, PokError, TranslationType, CacheWrapper};
 use truelayer_coding_challenge::models::poke_models::PokemonSpecies;
 
@@ -23,11 +24,7 @@ impl PokeClient for MockPokeAPI {
   }
 
   async fn get_pokemon(&self, pokemon: String) -> Result<PokemonSpecies, PokError> {
-    if pokemon == "pikachu" {
-      from_slice::<PokemonSpecies>(&read(format!("{}/tests/assets/raw_pikachu.json", ROOT)).expect("Read test data")).map_err(|e| e.into())
-    } else {
-      Err(PokError::Unavailable(StatusCode::BAD_REQUEST))
-    }
+    from_slice::<PokemonSpecies>(&read(format!("{}/tests/assets/raw_{}.json", ROOT, pokemon)).expect("Read test data")).map_err(|e| e.into())
   }
 }
 
@@ -42,12 +39,12 @@ impl TranslationClient for MockTranslationAPI {
     String::from("")
   }
 
-  async fn translate(&self, pokemon: &PokemonSpecies, _translate_to: TranslationType) -> Result<PokemonSpecies, PokError> {
-    if pokemon.name() == "pikachu" {
-      from_slice::<PokemonSpecies>(&read(format!("{}/tests/assets/translated_pikachu.json", ROOT)).expect("Read test data")).map_err(|e| e.into())
-    } else {
-      Err(PokError::Unavailable(StatusCode::BAD_REQUEST))
-    }
+  async fn translate(&self, pokemon: &PokemonSpecies, _translate_to: TranslationType) -> Result<String, PokError> {
+    let res = from_slice::<TranslationUnit>(&read(format!("{}/tests/assets/raw_translation_{}.json", ROOT, pokemon.name()))
+      .expect("Read test data"))
+      .expect("Parse test data");
+
+    Ok(res.contents().translated().to_owned())
   }
 }
 

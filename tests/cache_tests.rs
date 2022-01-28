@@ -52,7 +52,7 @@ async fn test_cache_utilisation_advanced() {
       .query_param("text", "When several of these POKéMON gather, their electricity could build and cause lightning storms.");
     then.status(200)
       .header("content-type", "application/json")
-      .body_from_file(format!("{}/tests/assets/raw_translation.json", ROOT));
+      .body_from_file(format!("{}/tests/assets/raw_translation_pikachu.json", ROOT));
   }).await;
 
   let translation_client = API::new()

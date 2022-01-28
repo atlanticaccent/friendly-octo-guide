@@ -78,7 +78,7 @@ impl TranslationClient for API {
     self.uri_override.clone().unwrap_or(Self::TRANSLATION_API.to_string())
   }
 
-  async fn translate(&self, pokemon: &PokemonSpecies, translate_to: TranslationType) -> Result<PokemonSpecies, PokError> {
+  async fn translate(&self, pokemon: &PokemonSpecies, translate_to: TranslationType) -> Result<String, PokError> {
     let desc = pokemon.get_first_description("en").ok_or(PokError::NoDescription)?;
 
     let res = self.client
@@ -90,17 +90,14 @@ impl TranslationClient for API {
       )
       .await?;
 
-    let status = res.status();
-    let bytes = to_bytes(res.into_body()).await?;
-    if !status.is_success() {
-      println!("{}", String::from_utf8_lossy(&bytes))
+    return if !res.status().is_success() {
+      Err(PokError::Unavailable(res.status()))
+    } else {
+      let bytes = to_bytes(res.into_body()).await?;
+      let translation_unit = from_slice::<TranslationUnit>(&bytes)?;
+      let translation = translation_unit.contents().translated().to_owned();
+
+      Ok(translation)
     }
-    let translation_unit = from_slice::<TranslationUnit>(&bytes)?;
-    let translation = translation_unit.contents().translated().to_owned();
-
-    let mut translated_pokemon = pokemon.clone();
-    translated_pokemon.set_description(translation);
-
-    Ok(translated_pokemon)
   }
 }

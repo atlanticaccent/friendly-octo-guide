@@ -25,7 +25,7 @@ pub trait TranslationClient: Send + Sync + Clone + 'static {
 
   fn get_translation_url(&self) -> String;
 
-  async fn translate(&self, pokemon: &PokemonSpecies, translate_to: TranslationType) -> Result<PokemonSpecies, PokError>;
+  async fn translate(&self, pokemon: &PokemonSpecies, translate_to: TranslationType) -> Result<String, PokError>;
 }
 
 #[async_trait]
