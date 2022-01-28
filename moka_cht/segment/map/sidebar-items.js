@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["HashMap","A lock-free hash map implemented with segmented bucket pointer arrays, open addressing, and linear probing."]]});

@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["Cache","A thread-safe, futures-aware concurrent in-memory cache."],["CacheBuilder","Builds a `Cache` with various configuration knobs."]],"trait":[["ConcurrentCacheExt","Provides extra methods that will be useful for testing."]]});

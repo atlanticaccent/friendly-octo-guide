@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["Cache","An in-memory cache that is not thread-safe."],["CacheBuilder","Builds a `Cache` with various configuration knobs."]]});
