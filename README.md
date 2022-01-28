@@ -59,6 +59,14 @@ The even simpler option is to run the application with Compose, which runs the c
 
 `docker compose up`
 
+## Building docs
+
+Rustdoc documentation can be built using the following:
+
+`cargo doc --no-deps`
+
+The built docs can be accessed by opening `/target/doc/truelayer_coding_challenge/index.html` in a browser, or by accessing this repository's [GitHub Pages](https://atlanticaccent.github.io/friendly-octo-guide/truelayer_coding_challenge/).
+
 ## Notes
 
 ### Logging and errors
