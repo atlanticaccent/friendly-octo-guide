@@ -9,7 +9,7 @@ use truelayer_coding_challenge::models::translation_models::TranslationUnit;
 use truelayer_coding_challenge::util::{PokeClient, TranslationClient, PokError, TranslationType, CacheWrapper};
 use truelayer_coding_challenge::models::poke_models::{PokemonSpecies, PokemonResponse};
 
-const ROOT: &'static str = env!("CARGO_MANIFEST_DIR");
+const ROOT: &str = env!("CARGO_MANIFEST_DIR");
 
 #[derive(Clone)]
 pub(crate) struct MockPokeAPI;

@@ -8,7 +8,7 @@ use truelayer_coding_challenge::{server::*, util::{TranslationType, MokaCache}, 
 mod mock_impl;
 use mock_impl::{MockPokeAPI, MockTranslationAPI};
 
-const ROOT: &'static str = env!("CARGO_MANIFEST_DIR");
+const ROOT: &str = env!("CARGO_MANIFEST_DIR");
 
 fn setup() -> impl Filter<Extract = impl Reply, Error = Infallible> + Clone {
   let cache: MokaCache<(String, TranslationType), PokemonResponse> = MokaCache(Cache::new(1_000));

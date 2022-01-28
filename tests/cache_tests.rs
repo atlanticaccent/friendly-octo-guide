@@ -9,7 +9,7 @@ use truelayer_coding_challenge::{
 mod mock_impl;
 use mock_impl::{MockTranslationAPI, MockPokeAPI, MockCache};
 
-const ROOT: &'static str = env!("CARGO_MANIFEST_DIR");
+const ROOT: &str = env!("CARGO_MANIFEST_DIR");
 
 #[tokio::test]
 async fn test_cache_utilisation_basic() {

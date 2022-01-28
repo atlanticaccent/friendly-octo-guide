@@ -3,7 +3,7 @@ use std::fs::read;
 use serde_json::from_slice;
 use truelayer_coding_challenge::models::{poke_models, translation_models};
 
-const ROOT: &'static str = env!("CARGO_MANIFEST_DIR");
+const ROOT: &str = env!("CARGO_MANIFEST_DIR");
 
 #[test]
 fn deserialize_poke_api_species() {
