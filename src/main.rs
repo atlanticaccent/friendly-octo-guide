@@ -22,6 +22,7 @@ pub async fn run() {
   let poke_client = api.clone();
   let translation_client = api.clone();
 
+  println!("Starting server on port 8080");
   warp::serve(router(poke_client, translation_client, cache))
     .run(([0, 0, 0, 0], 8080))
     .await;
