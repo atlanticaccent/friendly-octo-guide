@@ -69,7 +69,6 @@ pub async fn advanced_handler(
       Ok(pokemon)
     },
     Err(_err) => {
-      dbg!(_err);
       Ok(pokemon)
     }
   }
