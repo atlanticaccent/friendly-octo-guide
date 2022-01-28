@@ -7,6 +7,13 @@ use urlencoding::encode;
 use super::util::{PokeClient, TranslationClient, TranslationType, PokError};
 use super::models::{poke_models::PokemonSpecies, poke_models::PokemonResponse, translation_models::TranslationUnit};
 
+/// An "API" that can connect to a given API and make requests
+/// 
+/// This object exists to provide an HTTP/S client by which API requests can be 
+/// made in the PokeClient and TranslationClient implementations.
+/// 
+/// Includes fields for testing purposes allowing the override of the target url
+/// and https functionality.
 #[derive(Clone)]
 pub struct API {
   client: Client<HttpsConnector<HttpConnector>>,
@@ -24,11 +31,17 @@ impl API {
     }
   }
 
+  /// Set the URI override - this host will be contacted instead of the 
+  /// designated API address.
   pub fn override_uri(mut self, over_ride: String) -> Self {
     self.uri_override = Some(over_ride);
     self
   }
 
+  /// Disable https connectivity
+  /// 
+  /// This should probably only be used during testing, but there do still exist
+  /// non-https sites.
   pub fn disable_https(mut self) -> Self {
     self.https = false;
     self
@@ -37,6 +50,7 @@ impl API {
 
 #[async_trait]
 impl PokeClient for API {
+  /// The current known host for Pokeapi
   const POKEAPI: &'static str = "pokeapi.co";
 
   fn get_pokeapi_url(&self) -> String {
@@ -66,6 +80,7 @@ impl PokeClient for API {
 
 #[async_trait]
 impl TranslationClient for API {
+  /// The current known host for the funtranslations API
   const TRANSLATION_API: &'static str = "api.funtranslations.com";
 
   fn get_translation_url(&self) -> String {

@@ -18,6 +18,7 @@ use crate::models::poke_models::{PokemonSpecies, PokemonResponse};
 /// to modify what url an API under test contacts.
 #[async_trait]
 pub trait PokeClient: Send + Sync + Clone + 'static {
+  /// API host address - aka: authority
   const POKEAPI: &'static str;
 
   fn get_pokeapi_url(&self) -> String;
@@ -33,6 +34,7 @@ pub trait PokeClient: Send + Sync + Clone + 'static {
 /// to modify what url an API under test contacts.
 #[async_trait]
 pub trait TranslationClient: Send + Sync + Clone + 'static {
+  /// API host address - aka: authority
   const TRANSLATION_API: &'static str;
 
   fn get_translation_url(&self) -> String;
