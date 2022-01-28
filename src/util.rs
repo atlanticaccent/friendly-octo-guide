@@ -8,7 +8,7 @@ use async_trait::async_trait;
 use warp::{Reply, Rejection, reject::{Reject, MethodNotAllowed}, reply, body::BodyDeserializeError};
 use moka::future::Cache;
 
-use crate::models::poke_models::PokemonSpecies;
+use crate::models::poke_models::{PokemonSpecies, PokemonResponse};
 
 #[async_trait]
 pub trait PokeClient: Send + Sync + Clone + 'static {
@@ -25,7 +25,7 @@ pub trait TranslationClient: Send + Sync + Clone + 'static {
 
   fn get_translation_url(&self) -> String;
 
-  async fn translate(&self, pokemon: &PokemonSpecies, translate_to: TranslationType) -> Result<String, PokError>;
+  async fn translate(&self, pokemon: &PokemonResponse, translate_to: TranslationType) -> Result<String, PokError>;
 }
 
 #[async_trait]

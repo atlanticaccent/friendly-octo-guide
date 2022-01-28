@@ -3,7 +3,7 @@ use moka::future::Cache;
 extern crate truelayer_coding_challenge;
 
 use truelayer_coding_challenge::util::{TranslationType, MokaCache};
-use truelayer_coding_challenge::models::poke_models::PokemonSpecies;
+use truelayer_coding_challenge::models::poke_models::PokemonResponse;
 use truelayer_coding_challenge::api::API;
 use truelayer_coding_challenge::server::router;
 
@@ -13,7 +13,7 @@ async fn main() {
 }
 
 pub async fn run() {
-  let cache: MokaCache<(String, TranslationType), PokemonSpecies> = MokaCache(Cache::new(1_000));
+  let cache: MokaCache<(String, TranslationType), PokemonResponse> = MokaCache(Cache::new(1_000));
   let api = API::new();
   let poke_client = api.clone();
   let translation_client = api.clone();

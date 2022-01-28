@@ -1,38 +1,35 @@
 use std::convert::Infallible;
 
-use crate::util::{PokeClient, TranslationClient, TranslationType, handle_reject, PokError, CacheWrapper};
-use crate::models::poke_models::PokemonSpecies;
+use crate::util::{PokeClient, TranslationClient, TranslationType, handle_reject, CacheWrapper};
+use crate::models::poke_models::PokemonResponse;
 
 use warp::{Reply, Filter, reject, Rejection, reply::json, path};
 
 pub async fn basic_handler(
   pokemon: String,
   poke_client: impl PokeClient,
-  cache: impl CacheWrapper<(String, TranslationType), PokemonSpecies>,
-) -> Result<PokemonSpecies, Rejection> {
+  cache: impl CacheWrapper<(String, TranslationType), PokemonResponse>,
+) -> Result<PokemonResponse, Rejection> {
   if let Some(cached_pokemon) = cache.get(&(pokemon.clone(), TranslationType::None)) {
-    return Ok(cached_pokemon)
-  }
-
-  let mut species = poke_client
-    .get_pokemon(pokemon.clone())
-    .await
-    .map_err(|err| reject::custom(err))?;
-
-  if let Some(desc) = species.get_first_description("en") {
-    species.set_description(desc);
-    cache.insert((pokemon, TranslationType::None), species.clone()).await;
-    Ok(species)
+    Ok(cached_pokemon)
   } else {
-    Err(reject::custom(PokError::NoDescription))
+    let species = poke_client
+      .get_pokemon(pokemon.clone())
+      .await
+      .map_err(|err| reject::custom(err))?;
+
+    let response = PokemonResponse::try_from(species).map_err(|err| reject::custom(err))?;
+    cache.insert((pokemon, TranslationType::None), response.clone()).await;
+
+    Ok(response)
   }
 }
 
 pub async fn advanced_handler(
-  mut pokemon: PokemonSpecies,
+  mut pokemon: PokemonResponse,
   translation_client: impl TranslationClient,
-  cache: impl CacheWrapper<(String, TranslationType), PokemonSpecies>,
-) -> Result<PokemonSpecies, Rejection> {
+  cache: impl CacheWrapper<(String, TranslationType), PokemonResponse>,
+) -> Result<PokemonResponse, Rejection> {
   let translate_to = if pokemon.is_legendary() || pokemon.habitat() == "cave" {
     TranslationType::Yoda
   } else {
@@ -64,9 +61,8 @@ pub async fn advanced_handler(
 }
 
 fn format(
-  mut pokemon: PokemonSpecies
+  pokemon: PokemonResponse
 ) -> impl Reply {
-  pokemon.format_habitat();
   json(&pokemon)
 }
 
@@ -83,15 +79,15 @@ fn with_translation_client(
 }
 
 fn with_cache(
-  cache: impl CacheWrapper<(String, TranslationType), PokemonSpecies>,
-) -> impl Filter<Extract = (impl CacheWrapper<(String, TranslationType), PokemonSpecies>,), Error = Infallible> + Clone {
+  cache: impl CacheWrapper<(String, TranslationType), PokemonResponse>,
+) -> impl Filter<Extract = (impl CacheWrapper<(String, TranslationType), PokemonResponse>,), Error = Infallible> + Clone {
   warp::any().map(move || cache.clone())
 }
 
 pub fn router(
   poke_client: impl PokeClient,
   translation_client: impl TranslationClient,
-  cache: impl CacheWrapper<(String, TranslationType), PokemonSpecies>,
+  cache: impl CacheWrapper<(String, TranslationType), PokemonResponse>,
 ) -> impl Filter<Extract = impl Reply, Error = Infallible> + Clone {
   path!("pokemon" / String)
     .and(with_poke_client(poke_client.clone()))

@@ -5,7 +5,7 @@ use serde_json::from_slice;
 use urlencoding::encode;
 
 use super::util::{PokeClient, TranslationClient, TranslationType, PokError};
-use super::models::{poke_models::PokemonSpecies, translation_models::TranslationUnit};
+use super::models::{poke_models::PokemonSpecies, poke_models::PokemonResponse, translation_models::TranslationUnit};
 
 #[derive(Clone)]
 pub struct API {
@@ -58,13 +58,7 @@ impl PokeClient for API {
     }
 
     let bytes = to_bytes(res.into_body()).await?;
-    let mut species = from_slice::<PokemonSpecies>(&bytes)?;
-
-    if let Some(desc) = species.get_first_description("en") {
-      species.set_description(desc)
-    } else {
-      return Err(PokError::NoDescription)
-    }
+    let species = from_slice::<PokemonSpecies>(&bytes)?;
 
     Ok(species)
   }
@@ -78,8 +72,8 @@ impl TranslationClient for API {
     self.uri_override.clone().unwrap_or(Self::TRANSLATION_API.to_string())
   }
 
-  async fn translate(&self, pokemon: &PokemonSpecies, translate_to: TranslationType) -> Result<String, PokError> {
-    let desc = pokemon.get_first_description("en").ok_or(PokError::NoDescription)?;
+  async fn translate(&self, pokemon: &PokemonResponse, translate_to: TranslationType) -> Result<String, PokError> {
+    let desc = pokemon.description();
 
     let res = self.client
       .get(Uri::builder()

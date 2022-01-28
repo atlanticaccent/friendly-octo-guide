@@ -7,7 +7,7 @@ use serde_json::from_slice;
 
 use truelayer_coding_challenge::models::translation_models::TranslationUnit;
 use truelayer_coding_challenge::util::{PokeClient, TranslationClient, PokError, TranslationType, CacheWrapper};
-use truelayer_coding_challenge::models::poke_models::PokemonSpecies;
+use truelayer_coding_challenge::models::poke_models::{PokemonSpecies, PokemonResponse};
 
 const ROOT: &'static str = env!("CARGO_MANIFEST_DIR");
 
@@ -38,7 +38,7 @@ impl TranslationClient for MockTranslationAPI {
     String::from("")
   }
 
-  async fn translate(&self, pokemon: &PokemonSpecies, _translate_to: TranslationType) -> Result<String, PokError> {
+  async fn translate(&self, pokemon: &PokemonResponse, _translate_to: TranslationType) -> Result<String, PokError> {
     let res = from_slice::<TranslationUnit>(&read(format!("{}/tests/assets/raw_translation_{}.json", ROOT, pokemon.name()))
       .expect("Read test data"))
       .expect("Parse test data");
@@ -49,7 +49,7 @@ impl TranslationClient for MockTranslationAPI {
 
 #[derive(Clone)]
 pub struct MockCache {
-  cache: Cache<(String, TranslationType), PokemonSpecies>,
+  cache: Cache<(String, TranslationType), PokemonResponse>,
   get_count: Arc<Mutex<usize>>,
   insert_count: Arc<Mutex<usize>>,
 }
@@ -73,14 +73,14 @@ impl MockCache {
 }
 
 #[async_trait]
-impl CacheWrapper<(String, TranslationType), PokemonSpecies> for MockCache {
-  fn get(&self, key: &(std::string::String, TranslationType)) -> Option<PokemonSpecies> {
+impl CacheWrapper<(String, TranslationType), PokemonResponse> for MockCache {
+  fn get(&self, key: &(std::string::String, TranslationType)) -> Option<PokemonResponse> {
     let mut count = self.get_count.lock().unwrap();
     *count += 1;
     self.cache.get(key)
   }
 
-  async fn insert(&self, key: (std::string::String, TranslationType), value: PokemonSpecies) {
+  async fn insert(&self, key: (std::string::String, TranslationType), value: PokemonResponse) {
     {
       let mut count = self.insert_count.lock().unwrap();
       *count += 1;
